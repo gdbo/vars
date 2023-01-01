@@ -1,0 +1,7 @@
+debug = true
+
+[server]
+port = 5000
+
+[database]
+url = ""
