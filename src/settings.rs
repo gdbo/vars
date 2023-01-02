@@ -14,10 +14,16 @@ pub struct Database {
 }
 
 #[derive(Debug, Deserialize)]
+pub struct Logger {
+    pub level: String,
+}
+
+#[derive(Debug, Deserialize)]
 pub struct Settings {
     pub debug: bool,
     pub server: Server,
     pub database: Database,
+    pub logger: Logger,
 }
 
 impl Settings {
