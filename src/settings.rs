@@ -19,11 +19,17 @@ pub struct Logger {
 }
 
 #[derive(Debug, Deserialize)]
+pub struct Auth {
+    pub secret: String,
+}
+
+#[derive(Debug, Deserialize)]
 pub struct Settings {
     pub debug: bool,
     pub server: Server,
     pub database: Database,
     pub logger: Logger,
+    pub auth: Auth,
 }
 
 impl Settings {
@@ -34,7 +40,7 @@ impl Settings {
             .add_source(File::with_name("config/default"))
             .add_source(File::with_name(&format!("config/{}", run_mode)).required(false))
             .add_source(File::with_name("config/local").required(false))
-            .add_source(Environment::with_prefix("VARS"));
+            .add_source(Environment::with_prefix("vars"));
 
         if let Ok(url) = env::var("DATABASE_URL") {
             builder = builder.set_override("database.url", url)?;

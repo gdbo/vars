@@ -8,3 +8,6 @@ url = ""
 
 [logger]
 level = "info"
+
+[auth]
+secret = "This is a complex secret"

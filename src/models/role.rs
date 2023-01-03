@@ -1,4 +1,3 @@
-// use crate::errors::Error;
 use sqlx::FromRow;
 
 #[derive(FromRow)]
@@ -10,14 +9,14 @@ pub struct Role {
 }
 
 impl Role {
-    // pub async fn init(pool: &MySqlPool) -> Result<(), Error> {
+    // pub async fn init(pool: &MySqlPool) -> AppResult<()> {
     //     let _row = sqlx::query!(
     //         "INSERT INTO role(name, `default`, permissions) VALUES (?, ?, ?), (?, ?, ?);",
     //         "User",
     //         1,
     //         Permission::role_user(),
     //         "Admin",
-    //         2,
+    //         0,
     //         Permission::role_user(),
     //     )
     //     .execute(pool)

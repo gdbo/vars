@@ -5,4 +5,4 @@ mod comment;
 mod reply;
 mod role;
 mod tag;
-mod user;
+pub mod user;
