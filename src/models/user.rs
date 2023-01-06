@@ -1,7 +1,7 @@
 use crate::{
     api::{Pagination, PaginationResponse},
     errors::AppResult,
-    utils::hash::generate_hash,
+    utils::{avatar::get_avatar_url, hash::generate_hash},
 };
 use chrono::NaiveDateTime;
 use serde::{Deserialize, Serialize};
@@ -26,7 +26,6 @@ pub struct CreateUser {
     pub name: String,
     pub password: String,
     pub email: String,
-    pub avatar: Option<String>,
 }
 
 #[derive(Debug, Deserialize)]
@@ -52,6 +51,7 @@ pub struct PublicUser {
 impl User {
     pub async fn create(pool: &MySqlPool, user_info: &CreateUser) -> AppResult<u64> {
         let hash_password = generate_hash(&user_info.password)?;
+        let avatar = get_avatar_url(&user_info.email, 64);
 
         let last_id = sqlx::query_as!(
             PublicUser,
@@ -62,7 +62,7 @@ impl User {
             user_info.name,
             hash_password,
             user_info.email,
-            user_info.avatar,
+            avatar,
             1,
             0,
         )

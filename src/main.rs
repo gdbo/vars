@@ -21,9 +21,6 @@ async fn main() -> anyhow::Result<()> {
     // sqlx::migrate!().run(&pool).await?;
     logger::setup(&settings.logger.level);
 
-    println!("settings: {:?}", settings);
-
     router::serve(settings, pool).await;
-
     Ok(())
 }

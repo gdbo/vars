@@ -1,6 +1,6 @@
 use axum::{
     extract::{Path, Query, State},
-    routing::get,
+    routing::{get, put},
     Json, Router,
 };
 use serde_json::Value;
@@ -16,6 +16,8 @@ use crate::{
 pub fn create_route() -> Router<AppState> {
     Router::new()
         .route("/", get(get_users).post(create_user))
+        .route("/profile", get(get_user_profile))
+        .route("/edit", put(edit_user_profile))
         .route("/:id", get(get_user).put(update_user).delete(delete_user))
 }
 
@@ -102,3 +104,42 @@ pub async fn update_user(
 
 // 删除指定用户
 pub async fn delete_user(Path(_id): Path<i32>) {}
+
+// 获取当前用户信息
+pub async fn get_user_profile(claims: Claims, state: State<AppState>) -> AppResult<Json<Value>> {
+    let user = User::find_by_id(&state.db, claims.user.id).await?;
+    if user.is_none() {
+        return Err(Error::NotFound(String::from("user")));
+    }
+    let user = user.unwrap();
+    let resp = ApiResponse::new(user);
+    Ok(Json(serde_json::json!(resp)))
+}
+
+// 编辑当前用户信息
+pub async fn edit_user_profile(
+    claims: Claims,
+    state: State<AppState>,
+    Json(user_info): Json<UpdateUser>,
+) -> AppResult<Json<Value>> {
+    let exist_user = User::find_by_id(&state.db, claims.user.id).await?;
+    if exist_user.is_some() && exist_user.unwrap().id != claims.user.id {
+        return Err(Error::ObjectConflict(String::from(
+            "username or email has already been used",
+        )));
+    }
+
+    let update_ok = User::update(&state.db, claims.user.id, &user_info).await?;
+    if !update_ok {
+        return Err(Error::NotFound(String::from("user")));
+    }
+
+    let user = User::find_by_id(&state.db, claims.user.id).await?;
+    if user.is_none() {
+        return Err(Error::NotFound(String::from("user")));
+    }
+
+    let user = user.unwrap();
+    let resp = ApiResponse::new(user);
+    Ok(Json(serde_json::json!(resp)))
+}
