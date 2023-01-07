@@ -4,5 +4,5 @@ pub mod category;
 mod comment;
 mod reply;
 mod role;
-mod tag;
+pub mod tag;
 pub mod user;

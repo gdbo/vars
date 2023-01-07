@@ -5,12 +5,14 @@ use crate::router::AppState;
 
 pub mod auth;
 pub mod category;
+pub mod tag;
 pub mod user;
 
 pub fn create_route() -> Router<AppState> {
     Router::new()
         .nest("/users", user::create_route())
         .nest("/categories", category::create_route())
+        .nest("/tags", tag::create_route())
         .nest("/auth", auth::create_route())
 }
 
