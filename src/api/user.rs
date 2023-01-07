@@ -75,6 +75,7 @@ pub async fn get_user(
 
 // 更新指定用户的信息
 pub async fn update_user(
+    _claims: Claims,
     state: State<AppState>,
     Path(id): Path<i32>,
     Json(user_info): Json<UpdateUser>,
@@ -103,7 +104,15 @@ pub async fn update_user(
 }
 
 // 删除指定用户
-pub async fn delete_user(Path(_id): Path<i32>) {}
+pub async fn delete_user(
+    _claims: Claims,
+    state: State<AppState>,
+    Path(id): Path<i32>,
+) -> AppResult<Json<Value>> {
+    User::delete(&state.db, id).await?;
+    let resp = ApiResponse::new(());
+    Ok(Json(serde_json::json!(resp)))
+}
 
 // 获取当前用户信息
 pub async fn get_user_profile(claims: Claims, state: State<AppState>) -> AppResult<Json<Value>> {

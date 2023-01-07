@@ -1,6 +1,6 @@
 mod article;
 mod article_tag;
-mod category;
+pub mod category;
 mod comment;
 mod reply;
 mod role;

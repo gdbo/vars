@@ -182,4 +182,17 @@ impl User {
 
         Ok(effect_rows == 1)
     }
+
+    pub async fn delete(pool: &MySqlPool, id: i32) -> AppResult<()> {
+        sqlx::query!(
+            r#"
+                delete from user where id = ?
+            "#,
+            id
+        )
+        .execute(pool)
+        .await?
+        .rows_affected();
+        Ok(())
+    }
 }
