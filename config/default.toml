@@ -7,7 +7,7 @@ port = 5000
 url = ""
 
 [logger]
-level = "info"
+level = "debug"
 
 [auth]
 secret = "This is a complex secret"

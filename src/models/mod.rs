@@ -1,4 +1,4 @@
-mod article;
+pub mod article;
 mod article_tag;
 pub mod category;
 mod comment;

@@ -3,6 +3,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::router::AppState;
 
+pub mod article;
 pub mod auth;
 pub mod category;
 pub mod tag;
@@ -13,6 +14,7 @@ pub fn create_route() -> Router<AppState> {
         .nest("/users", user::create_route())
         .nest("/categories", category::create_route())
         .nest("/tags", tag::create_route())
+        .nest("/articles", article::create_route())
         .nest("/auth", auth::create_route())
 }
 

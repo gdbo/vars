@@ -6,6 +6,7 @@ use axum::Router;
 use sqlx::MySqlPool;
 use tower::ServiceBuilder;
 use tower_http::cors::{Any, CorsLayer};
+use tower_http::trace::TraceLayer;
 
 use crate::api;
 use crate::errors::{AppResult, Error};
@@ -28,7 +29,11 @@ pub async fn serve(settings: Settings, db: MySqlPool) {
             db,
             secret: settings.auth.secret,
         })
-        .layer(ServiceBuilder::new().layer(cors))
+        .layer(
+            ServiceBuilder::new()
+                .layer(TraceLayer::new_for_http())
+                .layer(cors),
+        )
         .fallback(handler_404);
 
     let addr = SocketAddr::from(([127, 0, 0, 1], settings.server.port));
