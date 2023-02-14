@@ -10,14 +10,30 @@ axum = { version = "^0.6", features = [ "headers" ] }
 tokio = { version = "1.0", features = ["full"] }
 tower = { version = "0.4", features = ["full"] }
 tower-http = { version = "0.3.0", features = ["cors", "trace"] }
+
+# auth
+jsonwebtoken = "^8.2"
+
+# database
+sqlx = { version = "0.6", features = [ "runtime-tokio-native-tls" , "mysql", "chrono" ] }
+
+# cli
+clap = { version = "^4.1", features = ["derive"] }
+
+# time
+chrono = { version = "0.4", features = ["serde"]}
+
+# log/tracing
 tracing = "0.1"
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
-sqlx = { version = "0.6", features = [ "runtime-tokio-native-tls" , "mysql", "chrono" ] }
+
+# config
+dotenvy = "0.15.6"
 config = "0.13"
+
+# serialize/deserialize
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
-dotenvy = "0.15.6"
-chrono = { version = "0.4", features = ["serde"]}
 
 # password hash
 argon2 = { version = "0.4", features = ["std"] }
@@ -28,6 +44,3 @@ blake2 = "0.10"
 # error handler
 anyhow = "1.0"
 thiserror = "1.0"
-
-# auth
-jsonwebtoken = "8.2.0"

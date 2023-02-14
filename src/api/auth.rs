@@ -1,3 +1,5 @@
+use std::sync::Arc;
+
 use axum::{extract::State, routing::post, Json, Router};
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
@@ -11,19 +13,19 @@ use crate::{
 
 use super::ApiResponse;
 
-pub fn create_route() -> Router<AppState> {
+pub fn create_route() -> Router<Arc<AppState>> {
     Router::new().route("/", post(authorize))
 }
 
 async fn authorize(
-    state: State<AppState>,
+    State(state): State<Arc<AppState>>,
     Json(payload): Json<AuthPayload>,
 ) -> AppResult<Json<Value>> {
     if payload.email.is_empty() || payload.password.is_empty() {
         return Err(Error::Auth(AuthError::MissingCredentials));
     }
 
-    let user = User::find_by_name_or_email(&state.db, &payload.email, &payload.email).await?;
+    let user = User::find_by_name_or_email(&state.pool, &payload.email, &payload.email).await?;
     if user.is_none() {
         return Err(Error::Auth(AuthError::WrongCredentials));
     }

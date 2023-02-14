@@ -1,3 +1,5 @@
+use std::sync::Arc;
+
 use axum::Router;
 use serde::{Deserialize, Serialize};
 
@@ -9,7 +11,7 @@ pub mod category;
 pub mod tag;
 pub mod user;
 
-pub fn create_route() -> Router<AppState> {
+pub fn create_route() -> Router<Arc<AppState>> {
     Router::new()
         .nest("/users", user::create_route())
         .nest("/categories", category::create_route())

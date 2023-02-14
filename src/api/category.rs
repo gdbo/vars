@@ -1,3 +1,5 @@
+use std::sync::Arc;
+
 use axum::{
     extract::{Path, Query, State},
     routing::get,
@@ -13,7 +15,7 @@ use crate::{
     utils::jwt::Claims,
 };
 
-pub fn create_route() -> Router<AppState> {
+pub fn create_route() -> Router<Arc<AppState>> {
     Router::new()
         .route("/", get(get_categories).post(create_category))
         .route(
@@ -26,18 +28,18 @@ pub fn create_route() -> Router<AppState> {
 
 // 注册新分类
 pub async fn create_category(
-    state: State<AppState>,
+    State(state): State<Arc<AppState>>,
     Json(category_info): Json<CategoryData>,
 ) -> AppResult<Json<Value>> {
-    let exist_category = Category::find_by_name(&state.db, &category_info.name).await?;
+    let exist_category = Category::find_by_name(&state.pool, &category_info.name).await?;
     if exist_category.is_some() {
         return Err(Error::ObjectConflict(String::from(
             "categoryname or email has already been used",
         )));
     }
 
-    let uid = Category::create(&state.db, &category_info).await?;
-    let new_category = Category::find_by_id(&state.db, uid as i32).await?;
+    let uid = Category::create(&state.pool, &category_info).await?;
+    let new_category = Category::find_by_id(&state.pool, uid as i32).await?;
     if new_category.is_none() {
         return Err(Error::NotFound(String::from("category")));
     }
@@ -50,10 +52,10 @@ pub async fn create_category(
 // 获取分类列表
 pub async fn get_categories(
     _claims: Claims,
-    state: State<AppState>,
+    State(state): State<Arc<AppState>>,
     Query(pagination): Query<Pagination>,
 ) -> AppResult<Json<Value>> {
-    let categories = Category::find_list(&state.db, &pagination).await?;
+    let categories = Category::find_list(&state.pool, &pagination).await?;
 
     let resp = ApiResponse::new(categories);
     Ok(Json(serde_json::json!(resp)))
@@ -62,10 +64,10 @@ pub async fn get_categories(
 // 获取指定分类
 pub async fn get_category(
     _claims: Claims,
-    state: State<AppState>,
+    State(state): State<Arc<AppState>>,
     Path(id): Path<i32>,
 ) -> AppResult<Json<Value>> {
-    let category = Category::find_by_id(&state.db, id).await?;
+    let category = Category::find_by_id(&state.pool, id).await?;
     if category.is_none() {
         return Err(Error::NotFound(String::from("category")));
     }
@@ -78,23 +80,23 @@ pub async fn get_category(
 // 更新指定分类的信息
 pub async fn update_category(
     _claims: Claims,
-    state: State<AppState>,
+    State(state): State<Arc<AppState>>,
     Path(id): Path<i32>,
     Json(category_info): Json<CategoryData>,
 ) -> AppResult<Json<Value>> {
-    let exist_category = Category::find_by_name(&state.db, &category_info.name).await?;
+    let exist_category = Category::find_by_name(&state.pool, &category_info.name).await?;
     if exist_category.is_some() && exist_category.unwrap().id != id {
         return Err(Error::ObjectConflict(String::from(
             "categoryname or email has already been used",
         )));
     }
 
-    let update_ok = Category::update(&state.db, id, &category_info).await?;
+    let update_ok = Category::update(&state.pool, id, &category_info).await?;
     if !update_ok {
         return Err(Error::NotFound(String::from("category")));
     }
 
-    let category = Category::find_by_id(&state.db, id).await?;
+    let category = Category::find_by_id(&state.pool, id).await?;
     if category.is_none() {
         return Err(Error::NotFound(String::from("category")));
     }
@@ -107,10 +109,10 @@ pub async fn update_category(
 // 删除指定分类
 pub async fn delete_category(
     _claims: Claims,
-    state: State<AppState>,
+    State(state): State<Arc<AppState>>,
     Path(id): Path<i32>,
 ) -> AppResult<Json<Value>> {
-    Category::delete(&state.db, id).await?;
+    Category::delete(&state.pool, id).await?;
     let resp = ApiResponse::new(());
     Ok(Json(serde_json::json!(resp)))
 }

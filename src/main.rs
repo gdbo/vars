@@ -1,4 +1,5 @@
 mod api;
+mod cli;
 mod database;
 mod errors;
 mod logger;
@@ -8,19 +9,31 @@ mod settings;
 mod utils;
 
 use anyhow::Context;
+use clap::Parser;
+use cli::Commands;
 use dotenvy::dotenv;
-use settings::Settings;
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
+    let args = cli::Cli::parse();
+
     // load environment variables from .env file
     dotenv().context(".env file not found")?;
 
-    let settings = Settings::new()?;
-    let pool = database::new(&settings.database.url).await?;
-    // sqlx::migrate!().run(&pool).await?;
-    logger::setup(&settings.logger.level);
+    let mut settings = settings::init()?;
+    let pool = database::init(&settings.database.url).await?;
+    logger::init(&settings.logger.level);
 
-    router::serve(settings, pool).await;
+    match args.command {
+        Some(Commands::Server { port }) => {
+            settings.server.port = port.unwrap_or(settings.server.port);
+            router::serve(settings, pool).await;
+        }
+        Some(Commands::Db(_cmd)) => {}
+        None => {
+            router::serve(settings, pool).await;
+        }
+    }
+
     Ok(())
 }

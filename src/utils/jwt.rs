@@ -1,3 +1,5 @@
+use std::sync::Arc;
+
 use axum::{
     async_trait,
     extract::{FromRef, FromRequestParts},
@@ -34,7 +36,7 @@ impl From<PublicUser> for AuthToken {
 #[async_trait]
 impl<S> FromRequestParts<S> for Claims
 where
-    AppState: FromRef<S>,
+    Arc<AppState>: FromRef<S>,
     S: Send + Sync,
 {
     type Rejection = Error;
@@ -44,7 +46,7 @@ where
             .await
             .map_err(|_| Error::Auth(AuthError::InvalidToken))?;
 
-        let state = AppState::from_ref(state);
+        let state = Arc::<AppState>::from_ref(state);
 
         let token_data = decode(bearer.token(), &state.secret)
             .map_err(|_| Error::Auth(AuthError::InvalidToken))?;
